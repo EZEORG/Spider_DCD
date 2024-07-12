@@ -16,27 +16,17 @@ def create_directory(path):
 def sanitize_filename(filename):
     return re.sub(r'[\\/*?:"<>|]', '_', filename)
 
-def run(playwright):
-    base_output_dir = 'output_files'
-    create_directory(base_output_dir)
-
-    browser = playwright.chromium.launch(headless=False)
-    context = browser.new_context()
-    page = context.new_page()
-    page.goto("https://www.dongchedi.com/auto/library/x-x-x-x-x-x-x-x-x-x-x")  # 替换为实际网址
-
-    # 获取所有车的卡片元素
+def scrape_page(page, base_output_dir, start_index=1):
     car_cards = page.query_selector_all('//div[contains(@class,"car-list_card")]')
     print(f"Found {len(car_cards)} car cards.")
-
-    for index, card in enumerate(car_cards, start=1):
+    
+    for index, card in enumerate(car_cards, start=start_index):
         try:
             # 点击“参数”按钮
             param_button = card.query_selector('//a[contains(text(),"参数")]')
             if param_button:
-                with context.expect_page() as new_page_info:
+                with page.context.expect_page() as new_page_info:
                     param_button.click()
-
                 new_page = new_page_info.value
                 new_page.wait_for_load_state("networkidle")
                 time.sleep(2)
@@ -103,8 +93,31 @@ def run(playwright):
         except Exception as e:
             print(f"抓取 car {index} 信息时出错：{e}")
 
-    # 等待3秒，确保所有操作完成
-    page.wait_for_timeout(3000)
+def run(playwright):
+    base_output_dir = 'output_files'
+    create_directory(base_output_dir)
+
+    browser = playwright.chromium.launch(headless=False)
+    context = browser.new_context()
+    page = context.new_page()
+    page.goto("https://www.dongchedi.com/auto/library/x-x-x-x-x-x-x-x-x-x-x")  # 替换为实际网址
+
+    index = 1
+    previous_card_count = 0
+
+    while True:
+        current_card_count = len(page.query_selector_all('//div[contains(@class,"car-list_card")]'))
+        if current_card_count == previous_card_count:
+            break
+
+        scrape_page(page, base_output_dir, index)
+        previous_card_count = current_card_count
+        index += current_card_count
+
+        # 向下滚动页面以加载更多卡片
+        page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+        time.sleep(2)  # 等待新卡片加载
+
     browser.close()
 
 with sync_playwright() as playwright:
