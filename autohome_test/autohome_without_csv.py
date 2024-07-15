@@ -1,3 +1,4 @@
+#这个程序中，没有保存csv的逻辑
 from playwright.sync_api import sync_playwright
 import re
 import time
@@ -58,7 +59,6 @@ def run(playwright):
                 csv_file_path = None
                 fieldnames = None
                 writer = None
-                all_reviews = []
 
                 while True:
                     # 获取所有完整口碑按钮
@@ -83,6 +83,8 @@ def run(playwright):
                                 print("未能找到车名")
                                 return
 
+                            all_reviews = []
+
                             reviewer_id_elem = review_page.query_selector('//a[contains(@id,"nickname")]')
                             if reviewer_id_elem:
                                 reviewer_id = reviewer_id_elem.text_content().strip()
@@ -98,22 +100,8 @@ def run(playwright):
                                 cleaned_title = clean_text(title.text_content().strip())
                                 review_data[cleaned_title] = item.text_content().strip()
 
-                            # 保存每个评价到CSV的一行
-                            if not csv_file_path:
-                                csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name}_reviews.csv')
-                                with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
-                                    fieldnames = ['车名', '用户ID'] + list(review_data.keys())[2:]
-                                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                                    writer.writeheader()
-                                    writer.writerow(review_data)
-                            else:
-                                with open(csv_file_path, 'a', newline='', encoding='utf-8') as csv_file:
-                                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                                    writer.writerow(review_data)
-
-                            print(f"数据已保存到 {csv_file_path}")
-
-                            review_page.close()
+                            all_reviews.append(review_data)
+                            #这里还需要添加保存csv的逻辑
 
                         except Exception as e:
                             print(f"抓取 car {index} 的评价时出错：{e}")
