@@ -1,6 +1,10 @@
 # ⚡Spider_DCD⚡
 
-汽车大模型项目代码，陈果自留。目前只做了懂车帝的爬虫，所以先这么叫。
+汽车大模型项目代码，陈果自留。
+
+安装了playwright的依赖之后，请记得使用以下代码安装playwright的浏览器依赖：
+
+`python3 -m playwright install`或`python -m playwright install`
 
 ## ✅TO DO LIST：
 - [  ] 汽车之家的口碑评论数据
