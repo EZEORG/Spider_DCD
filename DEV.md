@@ -7,7 +7,7 @@
 `python3 -m playwright install`或`python -m playwright install`
 
 ## ✅TO DO LIST：
-- [  ] 汽车之家的口碑评论数据
+- [☑️] 汽车之家的口碑评论数据
 - [  ] 懂车帝程序的bug
   - 多值数据抓取
   - 部分数据无法定位
@@ -48,3 +48,10 @@ qczj.py是异步编程的版本，qczj1.py是同步编程的版本，目前我�
 ### 😣7.16日志
 
 添加了Docker化的用法。
+
+另外，如果需要同步分支：
+```
+git checkout -b develop
+git branch --set-upstream-to=origin/develop develop
+git pull
+```
