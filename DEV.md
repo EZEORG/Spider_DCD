@@ -55,3 +55,5 @@ git checkout -b develop
 git branch --set-upstream-to=origin/develop develop
 git pull
 ```
+
+test中添加了一个带滚动逻辑的autohome_scroll.py,即当前页面的卡片都遍历完后，向下滚动渲染新的卡片，但是所需时间太长，还未测试。

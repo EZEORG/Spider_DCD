@@ -5,6 +5,7 @@ from pathlib import Path
 import csv
 
 def create_directory(path):
+    # 创建目录
     directory = Path(path)
     if not directory.exists():
         directory.mkdir(parents=True)
@@ -13,6 +14,7 @@ def create_directory(path):
         print(f"目录 {path} 已存在")
 
 def sanitize_filename(filename):
+    # 替换特殊字符
     return re.sub(r'[\\/*?:"<>|]', '_', filename)
 
 def clean_text(text):
@@ -135,7 +137,6 @@ def run(playwright):
         except Exception as e:
             print(f"抓取 car {index} 信息时出错：{e}")
 
-    # 等待3秒，确保所有操作完成
     page.wait_for_timeout(3000)
     browser.close()
 
