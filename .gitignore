@@ -163,5 +163,5 @@ cython_debug/
 
 
 data/
-output_files/
+dcd_data/
 autohome_reviews/

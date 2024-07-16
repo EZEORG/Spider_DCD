@@ -35,5 +35,9 @@ playwright install
 + [Playwright API](https://playwright.dev/python/docs/intro)
 + [lxml](https://lxml.de/)
 
+## Use Docker
 
+```
+docker-compose up --build
+```
 

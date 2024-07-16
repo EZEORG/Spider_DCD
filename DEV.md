@@ -7,7 +7,7 @@
 `python3 -m playwright install`或`python -m playwright install`
 
 ## ✅TO DO LIST：
-- [  ] 汽车之家的口碑评论数据
+- [☑️] 汽车之家的口碑评论数据
 - [  ] 懂车帝程序的bug
   - 多值数据抓取
   - 部分数据无法定位
@@ -44,3 +44,14 @@ qczj.py是异步编程的版本，qczj1.py是同步编程的版本，目前我�
 初步的计划是，先搁置这一块点击的逻辑。现在留下的几个程序，autohome.py是我计划的最终程序，现在卡在如何遍历每一辆车的每一条评价。也就是刚才说的“查看完整口碑”。autohome-in.py这个程序以完整口碑点击后的页面作为起始页，经过测试，已经能非常完善的爬到需要的数据了。下一步操作，要把遍历的逻辑搞好，然后把-in这个程序拉进去，数据就算是到手了。
 
 傍晚：程序似乎已经调好了，只是没有测试。autohome.py就是最终程序，之前可参考的半成品我都放到了test里面。
+
+### 😣7.16日志
+
+添加了Docker化的用法。
+
+另外，如果需要同步分支：
+```
+git checkout -b develop
+git branch --set-upstream-to=origin/develop develop
+git pull
+```
