@@ -17,7 +17,7 @@ def sanitize_filename(filename):
     return re.sub(r'[\\/*?:"<>|]', '_', filename)
 
 def run(playwright):
-    base_output_dir = 'output_files'
+    base_output_dir = 'dcd_data'
     create_directory(base_output_dir)
 
     browser = playwright.chromium.launch(headless=False)

@@ -94,7 +94,7 @@ def scrape_page(page, base_output_dir, start_index=1):
             print(f"抓取 car {index} 信息时出错：{e}")
 
 def run(playwright):
-    base_output_dir = 'output_files'
+    base_output_dir = 'dcd_data'
     create_directory(base_output_dir)
 
     browser = playwright.chromium.launch(headless=False)
