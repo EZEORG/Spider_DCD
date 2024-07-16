@@ -6,6 +6,7 @@ import csv
 from lxml import html
 
 def create_directory(path):
+    # 创建目录
     directory = Path(path)
     if not directory.exists():
         directory.mkdir(parents=True)
@@ -14,6 +15,7 @@ def create_directory(path):
         print(f"目录 {path} 已存在")
 
 def sanitize_filename(filename):
+    # 替换特殊字符
     return re.sub(r'[\\/*?:"<>|]', '_', filename)
 
 def run(playwright):
@@ -23,7 +25,7 @@ def run(playwright):
     browser = playwright.chromium.launch(headless=False)
     context = browser.new_context()
     page = context.new_page()
-    page.goto("https://www.dongchedi.com/auto/library/x-x-x-x-x-x-x-x-x-x-x")  # 替换为实际网址
+    page.goto("https://www.dongchedi.com/auto/library/x-x-x-x-x-x-x-x-x-x-x")
 
     # 获取所有车的卡片元素
     car_cards = page.query_selector_all('//div[contains(@class,"car-list_card")]')
@@ -40,12 +42,10 @@ def run(playwright):
                 new_page = new_page_info.value
                 new_page.wait_for_load_state("networkidle")
                 time.sleep(2)
-
-                # 获取当前页面内容
                 content = new_page.content()
                 dom = html.fromstring(content)
 
-                # 获取当前卡片中的所有车名
+                # 获取所有车名
                 car_names = dom.xpath('//a[contains(@class,"cell_car")]/text()')
                 car_name_texts = [name.strip() for name in car_names]
 
