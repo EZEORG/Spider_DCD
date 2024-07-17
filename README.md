@@ -40,9 +40,6 @@ playwright install
 * [Playwright API](https://playwright.dev/python/docs/intro)
 * [lxml](https://lxml.de/)
 * [pytest](https://docs.pytest.org/)
-
----
-
 * [懂车帝](https://www.dongchedi.com/)
 * [汽车之家](https://www.autohome.com.cn/)
 
