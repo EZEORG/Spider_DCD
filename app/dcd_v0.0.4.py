@@ -41,86 +41,111 @@ def run(playwright):
     
     page.goto("https://www.dongchedi.com/auto/library/x-x-x-x-x-x-x-x-x-x-x")
 
-    car_cards = page.query_selector_all('//div[contains(@class,"car-list_card")]')
-    # 获取所有车的卡片元素
-    print(f"Found {len(car_cards)} car cards.")
+    car_data = set()
+    scroll_count = 0
+    max_scrolls = 2
 
-    for index, card in enumerate(car_cards, start=1):
-        try:
-            # 点击“参数”按钮
-            param_button = card.query_selector('//a[contains(text(),"参数")]')
-            if param_button:
-                with context.expect_page() as new_page_info:
-                    param_button.click()
+    while scroll_count < max_scrolls:
+        # 获取当前页面所有车的卡片元素
+        car_cards = page.query_selector_all('//div[contains(@class,"car-list_card")]')
+        print(f"Found {len(car_cards)} car cards on scroll {scroll_count + 1}.")
 
-                new_page = new_page_info.value
-                new_page.wait_for_load_state("networkidle")
-                time.sleep(2)
-                content = new_page.content()
-                dom = html.fromstring(content)
+        # 提取车卡片元素信息并添加到集合中避免重复
+        new_car_data = set()
+        for car_card in car_cards:
+            car_info = car_card.inner_text()
+            if car_info not in car_data:
+                new_car_data.add(car_card)
+                car_data.add(car_info)
 
-                # 获取所有车名
-                car_names = dom.xpath('//a[contains(@class,"cell_car")]/text()')
-                car_name_texts = [name.strip() for name in car_names]
+        for index, car_card in enumerate(new_car_data, start=1):
+            try:
+                # 点击“参数”按钮
+                param_button = car_card.query_selector('//a[contains(text(),"参数")]')
+                if param_button:
+                    with context.expect_page() as new_page_info:
+                        param_button.click()
 
-                # 获取属性名
-                attribute_names = dom.xpath('//label/text()')
-                attribute_names = [attr.strip() for attr in attribute_names]
+                    new_page = new_page_info.value
+                    new_page.wait_for_load_state("networkidle")
+                    time.sleep(2)
+                    content = new_page.content()
+                    dom = html.fromstring(content)
 
-                # 初始化数据结构
-                car_data = {name: {attr: '' for attr in attribute_names} for name in car_name_texts}
+                    # 获取所有车名
+                    car_names = dom.xpath('//a[contains(@class,"cell_car")]/text()')
+                    car_name_texts = [name.strip() for name in car_names]
 
-                # 获取价格信息
-                prices = dom.xpath('//div[contains(@class,"official-price")]/text()')
-                price_texts = [price.strip() for price in prices]
+                    # 获取属性名
+                    attribute_names = dom.xpath('//label/text()')
+                    attribute_names = [attr.strip() for attr in attribute_names]
 
-                # 将价格信息填充到“官方指导价”列中
-                for i, car_name in enumerate(car_name_texts):
-                    if i < len(price_texts):
-                        car_data[car_name]['官方指导价'] = price_texts[i]
+                    # 初始化数据结构
+                    car_data_dict = {name: {attr: '' for attr in attribute_names} for name in car_name_texts}
 
-                # 获取属性值
-                xpath_value = '//div[@data-row-anchor]/parent::*/div[contains(@class,"table_row") and not(contains(@class,"title"))]'
-                value_elements = dom.xpath(xpath_value)
-                for elem in value_elements:
-                    # 遍历嵌套元素中的每一行
-                    nested_elem = elem.xpath('./div[contains(@class,"nest")]')
-                    if nested_elem:
-                        nested_rows = elem.xpath('.//div[contains(@class,"table_row")]')
-                        for row_index, row in enumerate(nested_rows):
-                            # 遍历每个车名对应的列
-                            for col_index in range(len(car_name_texts)):
-                                index_texts = row.xpath(f'.//div[contains(@style,"index:{col_index + 1}")]//text()')
-                                index_texts = [text.strip() for text in index_texts if text.strip()]
-                                if index_texts:
-                                    attribute_value = " ".join(index_texts)
-                                    car_data[car_name_texts[col_index]][attribute_names[value_elements.index(elem)]] = attribute_value
-                    else:
-                        cell_normal_elements = elem.xpath('.//div[contains(@class,"cell_normal")]')
-                        for i, cell in enumerate(cell_normal_elements):
-                            if cell.xpath('.//img'):
-                                text = 'NULL'
-                            else:
-                                text = cell.text_content().strip()
-                            if text:
-                                car_data[car_name_texts[i]][attribute_names[value_elements.index(elem)]] = text
+                    # 获取价格信息
+                    prices = dom.xpath('//div[contains(@class,"official-price")]/text()')
+                    price_texts = [price.strip() for price in prices]
 
-                # 保存为CSV文件
-                csv_file_path = Path(base_output_dir) / sanitize_filename(f'car_{index}.csv')
-                with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
-                    writer = csv.DictWriter(csv_file, fieldnames=['车名'] + attribute_names)
-                    writer.writeheader()
-                    for car_name in car_name_texts:
-                        row = {'车名': car_name}
-                        row.update(car_data[car_name])
-                        writer.writerow(row)
+                    # 将价格信息填充到“官方指导价”列中
+                    for i, car_name in enumerate(car_name_texts):
+                        if i < len(price_texts):
+                            car_data_dict[car_name]['官方指导价'] = price_texts[i]
 
-                print(f"数据已保存到 {csv_file_path}")
+                    # 获取属性值
+                    xpath_value = '//div[@data-row-anchor]/parent::*/div[contains(@class,"table_row") and not(contains(@class,"title"))]'
+                    value_elements = dom.xpath(xpath_value)
+                    for elem in value_elements:
+                        # 遍历嵌套元素中的每一行
+                        nested_elem = elem.xpath('./div[contains(@class,"nest")]')
+                        if nested_elem:
+                            nested_rows = elem.xpath('.//div[contains(@class,"table_row")]')
+                            for row_index, row in enumerate(nested_rows):
+                                # 遍历每个车名对应的列
+                                for col_index in range(len(car_name_texts)):
+                                    index_texts = row.xpath(f'.//div[contains(@style,"index:{col_index + 1}")]//text()')
+                                    index_texts = [text.strip() for text in index_texts if text.strip()]
+                                    if index_texts:
+                                        attribute_value = " ".join(index_texts)
+                                        car_data_dict[car_name_texts[col_index]][attribute_names[value_elements.index(elem)]] = attribute_value
+                        else:
+                            cell_normal_elements = elem.xpath('.//div[contains(@class,"cell_normal")]')
+                            for i, cell in enumerate(cell_normal_elements):
+                                if cell.xpath('.//img'):
+                                    text = 'NULL'
+                                else:
+                                    text = cell.text_content().strip()
+                                if text:
+                                    car_data_dict[car_name_texts[i]][attribute_names[value_elements.index(elem)]] = text
 
-                new_page.close()
+                    # 保存为CSV文件
+                    csv_file_path = Path(base_output_dir) / sanitize_filename(f'car_{index}.csv')
+                    with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
+                        writer = csv.DictWriter(csv_file, fieldnames=['车名'] + attribute_names)
+                        writer.writeheader()
+                        for car_name in car_name_texts:
+                            row = {'车名': car_name}
+                            row.update(car_data_dict[car_name])
+                            writer.writerow(row)
 
-        except Exception as e:
-            print(f"抓取 car {index} 信息时出错：{e}")
+                    print(f"数据已保存到 {csv_file_path}")
+
+                    new_page.close()
+
+            except Exception as e:
+                print(f"抓取 car {index} 信息时出错：{e}")
+        
+        # 滚动页面以加载更多的汽车卡片
+        last_height = page.evaluate("document.body.scrollHeight")
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        time.sleep(2)  # 等待页面加载
+        new_height = page.evaluate("document.body.scrollHeight")
+
+        # 检查页面高度是否发生变化，如果没有变化则停止滚动
+        if new_height == last_height:
+            break
+        
+        scroll_count += 1
 
     page.wait_for_timeout(3000)
     browser.close()
