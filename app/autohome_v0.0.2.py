@@ -5,6 +5,7 @@ from pathlib import Path
 import csv
 
 def create_directory(path):
+    # 创建目录
     directory = Path(path)
     if not directory.exists():
         directory.mkdir(parents=True)
@@ -13,9 +14,11 @@ def create_directory(path):
         print(f"目录 {path} 已存在")
 
 def sanitize_filename(filename):
+    # 替换特殊字符
     return re.sub(r'[\\/*?:"<>|]', '_', filename)
 
 def clean_text(text):
+    # 去掉数字和换行符
     cleaned_text = re.sub(r'\d+', '', text).replace('\n', '').strip()
     return cleaned_text
 
@@ -54,9 +57,11 @@ def run(playwright):
             new_page.wait_for_load_state("networkidle")
             time.sleep(5)
 
+            # 弹窗检测
             new_page.mouse.click(100, 100)
             time.sleep(1)
 
+            # 点击“口碑”按钮
             koubei_button = new_page.query_selector('//li/a[text()="口碑"]')
             if koubei_button:
                 with context.expect_page() as koubei_page_info:
@@ -72,6 +77,7 @@ def run(playwright):
                 all_reviews = []
 
                 while True:
+                    # 获取所有完整口碑按钮
                     review_buttons = koubei_page.query_selector_all('//a[contains(text(),"查看完整口碑")]')
                     print(f"Found {len(review_buttons)} reviews on this page.")
 
@@ -84,6 +90,7 @@ def run(playwright):
                             review_page.wait_for_load_state("networkidle")
                             time.sleep(2)
 
+                            # 获取评价信息
                             car_name_elem = review_page.query_selector('//div[contains(@class,"title-name")]//a')
                             if car_name_elem:
                                 car_name = car_name_elem.text_content().strip()
@@ -107,6 +114,7 @@ def run(playwright):
                                 cleaned_title = clean_text(title.text_content().strip())
                                 review_data[cleaned_title] = item.text_content().strip()
 
+                            # 保存每个评价到CSV的一行
                             if not csv_file_path:
                                 csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name}_reviews.csv')
                                 with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
@@ -125,7 +133,8 @@ def run(playwright):
 
                         except Exception as e:
                             print(f"抓取 car {index} 的评价时出错：{e}")
-
+                            
+                    # 点击下一页按钮
                     next_button = koubei_page.query_selector('//a[contains(@class,"next")]')
                     if next_button:
                         next_button.click()
