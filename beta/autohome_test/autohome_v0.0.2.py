@@ -116,7 +116,7 @@ def run(playwright):
 
                             # 保存每个评价到CSV的一行
                             if not csv_file_path:
-                                csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name}_reviews.csv')
+                                csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name}_评价.csv')
                                 with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
                                     fieldnames = ['车名', '用户ID'] + list(review_data.keys())[2:]
                                     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)

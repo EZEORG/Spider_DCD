@@ -59,7 +59,7 @@ def run(playwright):
         # 滚动页面以加载更多的汽车卡片
         last_height = page.evaluate("document.body.scrollHeight")
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        time.sleep(2)  # 等待页面加载
+        page.wait_for_load_state("networkidle")
         new_height = page.evaluate("document.body.scrollHeight")
 
         # 检查页面高度是否发生变化，如果没有变化则停止滚动
@@ -80,7 +80,6 @@ def run(playwright):
 
                 new_page = new_page_info.value
                 new_page.wait_for_load_state("networkidle")
-                time.sleep(2)
                 content = new_page.content()
                 dom = html.fromstring(content)
 
@@ -147,7 +146,7 @@ def run(playwright):
         except Exception as e:
             print(f"抓取 {car_name} 信息时出错：{e}")
 
-    page.wait_for_timeout(3000)
+    page.wait_for_timeout(1000)
     browser.close()
 
 with sync_playwright() as playwright:
