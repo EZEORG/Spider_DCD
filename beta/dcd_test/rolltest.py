@@ -98,4 +98,4 @@ def run(playwright, max_scrolls=10):
     browser.close()
 
 with sync_playwright() as playwright:
-    run(playwright, max_scrolls=10)
+    run(playwright, max_scrolls=30)

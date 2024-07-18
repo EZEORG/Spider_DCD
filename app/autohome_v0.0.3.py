@@ -64,6 +64,7 @@ def run(playwright):
         last_height = page.evaluate("document.body.scrollHeight")
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_load_state("networkidle")
+        time.sleep(2)
         new_height = page.evaluate("document.body.scrollHeight")
 
         # 检查页面高度是否发生变化，如果没有变化则停止滚动
@@ -96,6 +97,7 @@ def run(playwright):
 
                 koubei_page = koubei_page_info.value
                 koubei_page.wait_for_load_state("networkidle")
+                time.sleep(2)
 
                 csv_file_path = None
                 fieldnames = None
@@ -113,6 +115,7 @@ def run(playwright):
 
                             review_page = review_page_info.value
                             review_page.wait_for_load_state("networkidle")
+                            time.sleep(2)
 
                             # 获取评价信息
                             car_name_elem = review_page.query_selector('//div[contains(@class,"title-name")]//a')
@@ -163,6 +166,7 @@ def run(playwright):
                     if next_button:
                         next_button.click()
                         koubei_page.wait_for_load_state("networkidle")
+                        time.sleep(2)
                     else:
                         break
 

@@ -29,7 +29,7 @@ def run(playwright):
         "Accept-Encoding": "gzip, deflate, br"
     }
 
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
 
@@ -43,7 +43,7 @@ def run(playwright):
 
     car_data = {}
     scroll_count = 0
-    max_scrolls = 2
+    max_scrolls = 30
 
     while scroll_count < max_scrolls:
         # 获取当前页面所有车的卡片元素
@@ -60,6 +60,7 @@ def run(playwright):
         last_height = page.evaluate("document.body.scrollHeight")
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_load_state("networkidle")
+        time.sleep(2)
         new_height = page.evaluate("document.body.scrollHeight")
 
         # 检查页面高度是否发生变化，如果没有变化则停止滚动
@@ -80,6 +81,7 @@ def run(playwright):
 
                 new_page = new_page_info.value
                 new_page.wait_for_load_state("networkidle")
+                time.sleep(2)
                 content = new_page.content()
                 dom = html.fromstring(content)
 
