@@ -131,7 +131,7 @@ def run(playwright):
                                 car_data_dict[car_name_texts[i]][attribute_names[value_elements.index(elem)]] = text
 
                 # 保存为CSV文件
-                csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name_out}.csv')
+                csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name_out}_参数.csv')
                 with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
                     writer = csv.DictWriter(csv_file, fieldnames=['车名'] + attribute_names)
                     writer.writeheader()
