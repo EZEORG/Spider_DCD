@@ -2,6 +2,8 @@
 
 汽车大模型项目代码
 
+放在实验室的机器上跑，一定要记得修改headless参数为True！否则跑不起来！实验室的机器不整浏览器内核！！！
+
 ### ⏬Install Python Requirements
 
 ```bash
