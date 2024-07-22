@@ -155,11 +155,11 @@ def run(playwright):
                                     writer.writerow(review_data)
 
                             print(f"数据已保存到 {csv_file_path}")
-
                             review_page.close()
 
                         except Exception as e:
                             print(f"抓取 {car_name_out} 的评价时出错：{e}")
+                            review_page.close()
                             
                     # 点击下一页按钮
                     next_button = koubei_page.query_selector('//a[contains(@class,"next")]')
