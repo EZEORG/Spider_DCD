@@ -23,9 +23,9 @@ def clean_text(text):
     cleaned_text = re.sub(r'\d+', '', text).replace('\n', '').strip()
     return cleaned_text
 
-def write_to_csv(file_path, data, mode='a'):
+def write_to_csv(file_path, data, mode='a', fieldnames=None):
     with open(file_path, mode, newline='', encoding='utf-8') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=data.keys())
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         if mode == 'w':
             writer.writeheader()
         writer.writerow(data)
@@ -119,9 +119,7 @@ def run(playwright):
                 koubei_page.wait_for_load_state("networkidle")
                 time.sleep(2)
 
-                csv_file_path = None
-                fieldnames = None
-                writer = None
+                csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name_out}_评价.csv')
 
                 while True:
                     try:
@@ -163,31 +161,27 @@ def run(playwright):
                                     cleaned_title = clean_text(title.text_content().strip())
                                     review_data[cleaned_title] = item.text_content().strip()
 
-                                if not csv_file_path:
-                                    csv_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name_out}_评价.csv')
-                                    write_to_csv(csv_file_path, review_data, mode='w')
+                                if not csv_file_path.exists():
+                                    fieldnames = list(review_data.keys())
+                                    write_to_csv(csv_file_path, review_data, mode='w', fieldnames=fieldnames)
                                 else:
-                                    current_fields = set(review_data.keys())
-                                    existing_fields = set()
                                     with open(csv_file_path, 'r', newline='', encoding='utf-8') as csv_file:
                                         reader = csv.DictReader(csv_file)
-                                        existing_fields = set(reader.fieldnames)
+                                        existing_fields = reader.fieldnames
 
-                                    if current_fields != existing_fields:
-                                        temp_file_path = Path(base_output_dir) / sanitize_filename(f'{car_name_out}_评价_temp.csv')
-                                        with open(csv_file_path, 'r', newline='', encoding='utf-8') as csv_file, \
-                                             open(temp_file_path, 'w', newline='', encoding='utf-8') as temp_file:
-                                            reader = csv.DictReader(csv_file)
-                                            all_fields = list(current_fields.union(existing_fields))
-                                            writer = csv.DictWriter(temp_file, fieldnames=all_fields)
-                                            writer.writeheader()
-                                            for row in reader:
-                                                writer.writerow(row)
-                                            writer.writerow(review_data)
+                                    current_fields = set(review_data.keys())
+                                    missing_fields = set(existing_fields) - current_fields
+                                    extra_fields = current_fields - set(existing_fields)
 
-                                        temp_file_path.replace(csv_file_path)
-                                    else:
-                                        write_to_csv(csv_file_path, review_data, mode='a')
+                                    # 忽略多出的字段
+                                    for field in extra_fields:
+                                        review_data.pop(field, None)
+
+                                    # 填补缺失的字段
+                                    for field in missing_fields:
+                                        review_data[field] = ''
+
+                                    write_to_csv(csv_file_path, review_data, mode='a', fieldnames=existing_fields)
 
                                 print(f"数据已保存到 {csv_file_path}")
 
@@ -217,7 +211,7 @@ def run(playwright):
 
         except Exception as e:
             print(f"抓取 {car_name_out} 信息时出错：{e}")
-            take_screenshot(page, f"car_page_error_{car_name_out}.png")
+            #take_screenshot(page, f"car_page_error_{car_name_out}.png")
 
     page.wait_for_timeout(1000)
     browser.close()
