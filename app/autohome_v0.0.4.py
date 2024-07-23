@@ -48,7 +48,7 @@ def run(playwright):
         "Accept-Encoding": "gzip, deflate, br"
     }
 
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
 
