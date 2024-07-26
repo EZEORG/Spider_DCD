@@ -74,3 +74,16 @@ dcd_v0.0.6中，我按照card外面的车名进行保存。
 autohome_v0.0.4中，新增了一个出错时截图的功能，不过目前被我注释了。
 
 新增了字段检索的处理，如果与csv中字段相比更多，则忽略多的部分；如果更少，就把缺少的部分填成空。这样，可以提升一些效率，也能减少些错误。
+
+### 🎂7.26日志
+
+新增了数据库逻辑，app文件夹中新增一个程序sqlite，可以将autohome_reviews_save(可更改)文件夹中的csv文件数据放入db。
+
+经过调试，app中的autohome_v0.0.7在爬取页面时，会把img和css使用filter去掉。另外，在这个程序中，可以记录已经爬取过的内容，下一次就可以把已经爬过的内容跳过了。储存在根目录的progress.json中。
+
+```
+sqlite3 db/data.db  # 进入数据库
+.tables # 查看当前的表
+select * from reviews limit 20; # 查看前20行
+pragma table_info(reviews) # 查看表的结构
+```

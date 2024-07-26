@@ -34,6 +34,7 @@ playwright install
 - [x] pytest测试
   - [ ] pytest测试脚本
 - [x] 伪装header
+- [x] 建立数据库储存评价数据
 - [ ] 储存数据，建立知识库
 - [ ] 数据喂给大模型，做RAG检索增强生成  
 
@@ -42,6 +43,7 @@ playwright install
 * [Playwright API](https://playwright.dev/python/docs/intro)
 * [lxml](https://lxml.de/)
 * [pytest](https://docs.pytest.org/)
+* [pandas](https://pandas.pydata.org/pandas-docs/stable/)
 * [懂车帝](https://www.dongchedi.com/)
 * [汽车之家](https://www.autohome.com.cn/)
 
