@@ -87,3 +87,9 @@ sqlite3 db/data.db  # 进入数据库
 select * from reviews limit 20; # 查看前20行
 pragma table_info(reviews) # 查看表的结构
 ```
+
+### 😶7.27日志
+
+添加了read.py程序，这个程序可以读取autohome_reviews_save文件夹中的所有内容，目前我给的程序逻辑是将里面的全部标记为已完成。这个脚本的用处，是在你的机器上读取已经有的信息。
+
+progress.json中有三个属性，目前我还没有详细读取这三个属性的逻辑，后续可以进行更新。
