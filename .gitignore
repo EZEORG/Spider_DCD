@@ -166,7 +166,5 @@ dcd_data/
 autohome_reviews/
 autohome_reviews_save/
 .virtual_documents/
-jupyters/
-screenshots/
-db/
-progress.json
+jupyter/
+
