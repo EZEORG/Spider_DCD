@@ -1,13 +1,13 @@
-from playwright.sync_api import sync_playwright
 import re
 import time
-from pathlib import Path
 import csv
 import json
 import logging
-from lxml import html
+from pathlib import Path
 from datetime import datetime
 from logging import handlers
+from lxml import html
+from playwright.sync_api import sync_playwright
 
 def create_directory(path):
     directory = Path(path)
