@@ -106,7 +106,7 @@ def run(playwright):
         "Accept-Encoding": "gzip, deflate, br"
     }
 
-    browser = playwright.chromium.launch(headless=True)
+    browser = playwright.chromium.launch(headless=False)
     context = browser.new_context()
     page = context.new_page()
 
@@ -149,9 +149,20 @@ def run(playwright):
                         car_card.click()
 
                     new_page = new_page_info.value
-                    new_page.wait_for_load_state("networkidle")
-                    time.sleep(5)
+                    retry_count = 3
+                    for i in range(retry_count):
+                        try:
+                            new_page.wait_for_load_state("networkidle", timeout=60000)
+                            break  # 成功加载后跳出循环
+                        except Exception as e:
+                            if i < retry_count - 1:
+                                logger.warning(f"重试加载页面 ({i+1}/{retry_count}) 失败: {e}")
+                                time.sleep(2)  # 等待几秒后重试
+                            else:
+                                logger.error(f"页面加载重试次数已用尽: {e}")
+                                raise  # 重试用尽后抛出异常
 
+                    time.sleep(5)
                     new_page.mouse.click(100, 100)
                     time.sleep(1)
 
@@ -161,7 +172,18 @@ def run(playwright):
                             koubei_button.click()
 
                         koubei_page = koubei_page_info.value
-                        koubei_page.wait_for_load_state("networkidle")
+                        for i in range(retry_count):
+                            try:
+                                koubei_page.wait_for_load_state("networkidle", timeout=60000)
+                                break
+                            except Exception as e:
+                                if i < retry_count - 1:
+                                    logger.warning(f"重试加载口碑页面 ({i+1}/{retry_count}) 失败: {e}")
+                                    time.sleep(2)
+                                else:
+                                    logger.error(f"口碑页面加载重试次数已用尽: {e}")
+                                    raise
+
                         time.sleep(2)
 
                         csv_file_path = Path(base_output_dir) / f'{car_name_out}_评价.csv'
@@ -189,7 +211,18 @@ def run(playwright):
                                     review_button.click()
 
                                 review_page = review_page_info.value
-                                review_page.wait_for_load_state("networkidle")
+                                for i in range(retry_count):
+                                    try:
+                                        review_page.wait_for_load_state("networkidle", timeout=60000)
+                                        break
+                                    except Exception as e:
+                                        if i < retry_count - 1:
+                                            logger.warning(f"重试加载评价页面 ({i+1}/{retry_count}) 失败: {e}")
+                                            time.sleep(2)
+                                        else:
+                                            logger.error(f"评价页面加载重试次数已用尽: {e}")
+                                            raise
+
                                 time.sleep(2)
 
                                 car_name_elem = review_page.query_selector('//div[contains(@class,"title-name")]//a')
@@ -214,19 +247,14 @@ def run(playwright):
                                 review_titles = review_page.query_selector_all('//p[@class="kb-item-msg"]/preceding-sibling::h1')
                                 review_scores = review_page.query_selector_all('//p[@class="kb-item-msg"]/preceding-sibling::h1/span')
 
-
-                                # 构建包含标题及评分的字典
                                 review_data = {'车名': car_name, '用户ID': reviewer_id}
                                 for title, item, score in zip(review_titles, review_items, review_scores):
-                                    # 仅保留标题中的中文字符
                                     cleaned_title = ''.join(re.findall(r'[\u4e00-\u9fa5]', title.text_content().strip()))
                                     cleaned_item = item.text_content().strip()
                                     cleaned_score = score.text_content().strip() if score else '无评分'
-                                    
-                                    # 以清理后的标题为键名保存数据
+
                                     review_data[f'{cleaned_title}'] = cleaned_item
                                     review_data[f'{cleaned_title}评分'] = cleaned_score
-
 
                                 if not csv_file_path.exists():
                                     fieldnames = list(review_data.keys())
@@ -240,37 +268,38 @@ def run(playwright):
 
                                 review_page.close()
 
-                            next_page_button = koubei_page.query_selector('//a[@class="page-item-next"]')
-                            if next_page_button and not next_page_button.get_property('classList').contains('disabled'):
-                                next_page_button.click()
-                                koubei_page.wait_for_load_state("networkidle")
-                                time.sleep(2)
-                                current_page += 1
+                            next_page_button = koubei_page.query_selector("//a[contains(@class, 'ace-pagination__btn next')]")
+                            if next_page_button:
+                                class_list = next_page_button.get_attribute('class')
+                                if 'disabled' not in class_list:
+                                    logger.info(f"Clicking next page {current_page + 1} for car {car_name_out}.")
+                                    next_page_button.click()
+                                    koubei_page.wait_for_load_state("networkidle")
+                                    time.sleep(2)
+                                    current_page += 1
+                                else:
+                                    logger.info(f"No more pages for car {car_name_out}. Closing the review page.")
+                                    koubei_page.close()
+                                    break
                             else:
+                                logger.warning(f"Next page button not found for car {car_name_out}. Closing the review page.")
+                                koubei_page.close()
                                 break
 
-                        save_progress(car_name_out, 'completed')
-
-                    koubei_page.close()
-
+                    save_progress(car_name_out, 'completed')
                     new_page.close()
 
                 except Exception as e:
-                    logger.error(f"An error occurred while processing {car_name_out}: {str(e)}")
-                    save_progress(car_name_out, 'error')
-                    continue
+                    logger.error(f"Error processing car {car_name}: {e}")
 
-        page.evaluate("window.scrollBy(0, document.body.scrollHeight);")
-        time.sleep(2)
-
-        current_height = page.evaluate("document.body.scrollHeight")
+        current_height = page.evaluate('document.body.scrollHeight')
         if current_height == previous_height:
             break
-
         previous_height = current_height
+        page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+        time.sleep(2)
 
     logger.info("Scraping completed.")
-    context.close()
     browser.close()
 
 with sync_playwright() as playwright:
