@@ -6,3 +6,17 @@
 1. 使用了python logging替换简单的print，且能保存每一次程序运行的日志文件。
 2. 添加了记录逻辑，可以记录、读取本地已抓取的车名。
 3. 修改了滚动逻辑，每次滚动如果车辆卡片数量发生变化，就进行一轮抓取。
+
+### 9.3 
+添加了sqlite_dcd.py，初步实现将本地dcd_data目录下的csv文件存入一个db中的功能。
+
+汽车之家的程序添加了记录读取和滚动逻辑，目前待修复的问题如下：
+
+1. 进入口碑页面抓取每一条时不会翻页。
+2. 如果想给csv文件加第一行属性名，就只能抓到车名和用户ID。
+3. 数据没抓好，所以汽车之家的数据库也不完善。
+
+Xpath表达式如下：
+评价项的title：//div[contains(@class,"item")]//h1/text()[normalize-space()]
+每个title的评分：//div[contains(@class,"item")]//h1//span[@class="star-num"]/text()
+title对应的内容：//div[contains(@class,"item")]/p

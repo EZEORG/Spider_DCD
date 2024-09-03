@@ -2,3 +2,5 @@ playwright
 lxml
 pytest
 pandas
+ipython-sql
+pypinyin
