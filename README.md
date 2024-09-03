@@ -2,7 +2,9 @@
 
 汽车大模型项目代码
 
-放在实验室的机器上跑，一定要记得修改headless参数为True！否则跑不起来！实验室的机器不整浏览器内核！！！
+对于非本机测试（如服务器）运行时，请检查程序Headless是否为**True**。
+
+运行爬虫程序时请关闭所有的代理。
 
 ### ⏬Install Python Requirements
 
@@ -14,8 +16,6 @@ pip install -r requirements.txt
 
 ### 🚀Install Playwright
 
-安装了playwright的依赖之后，请记得使用以下代码安装playwright的浏览器依赖：
-
 ```bash
 python3 -m playwright install
 # or 
@@ -24,19 +24,8 @@ playwright install
 
 ## ✅TO DO LIST：
 
-- [x] 汽车之家的口碑评论数据
-  - [ ] 遍历当前页面汽车卡片后的滚动翻页测试
-- [x] 懂车帝程序的bug
-  - [x] 多值数据抓取
-  - [x] 部分数据无法定位
-  - [x] 滚动逻辑测试
-- [x] 添加了clear.py程序，清除本地数据文件夹的所有文件，方便测试使用
-- [x] pytest测试
-  - [ ] pytest测试脚本
-- [x] 伪装header
-- [x] 建立数据库储存评价数据
-- [ ] 储存数据，建立知识库
-- [ ] 数据喂给大模型，做RAG检索增强生成  
+- [ ] 程序测试
+- [ ] 数据库写入 
 
 ## 📖References:
 
@@ -44,6 +33,8 @@ playwright install
 * [lxml](https://lxml.de/)
 * [pytest](https://docs.pytest.org/)
 * [pandas](https://pandas.pydata.org/pandas-docs/stable/)
+* [ipython-sql](https://pypi.org/project/ipython-sql/)
+* [pypinyin](https://pypi.org/project/pypinyin/)
 * [懂车帝](https://www.dongchedi.com/)
 * [汽车之家](https://www.autohome.com.cn/)
 
