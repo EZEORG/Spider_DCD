@@ -13,10 +13,5 @@
 汽车之家的程序添加了记录读取和滚动逻辑，目前待修复的问题如下：
 
 1. 进入口碑页面抓取每一条时不会翻页。
-2. 如果想给csv文件加第一行属性名，就只能抓到车名和用户ID。
+~~2. 如果想给csv文件加第一行属性名，就只能抓到车名和用户ID。~~
 3. 数据没抓好，所以汽车之家的数据库也不完善。
-
-Xpath表达式如下：
-评价项的title：//div[contains(@class,"item")]//h1/text()[normalize-space()]
-每个title的评分：//div[contains(@class,"item")]//h1//span[@class="star-num"]/text()
-title对应的内容：//div[contains(@class,"item")]/p

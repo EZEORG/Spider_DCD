@@ -212,14 +212,27 @@ def run(playwright):
 
                                 review_items = review_page.query_selector_all('//p[@class="kb-item-msg"]')
                                 review_titles = review_page.query_selector_all('//p[@class="kb-item-msg"]/preceding-sibling::h1')
+                                review_scores = review_page.query_selector_all('//p[@class="kb-item-msg"]/preceding-sibling::h1/span')
 
+
+                                # 构建包含标题及评分的字典
                                 review_data = {'车名': car_name, '用户ID': reviewer_id}
-                                for title, item in zip(review_titles, review_items):
-                                    cleaned_title = title.text_content().strip()
+                                for title, item, score in zip(review_titles, review_items, review_scores):
+                                    # 仅保留标题中的中文字符
+                                    cleaned_title = ''.join(re.findall(r'[\u4e00-\u9fa5]', title.text_content().strip()))
                                     cleaned_item = item.text_content().strip()
-                                    review_data[cleaned_title] = cleaned_item
+                                    cleaned_score = score.text_content().strip() if score else '无评分'
+                                    
+                                    # 以清理后的标题为键名保存数据
+                                    review_data[f'{cleaned_title}'] = cleaned_item
+                                    review_data[f'{cleaned_title}评分'] = cleaned_score
 
-                                write_to_csv(csv_file_path, review_data, 'a', fieldnames=list(review_data.keys()))
+
+                                if not csv_file_path.exists():
+                                    fieldnames = list(review_data.keys())
+                                    write_to_csv(csv_file_path, review_data, 'w', fieldnames=fieldnames)
+                                else:
+                                    write_to_csv(csv_file_path, review_data, 'a', fieldnames=list(review_data.keys()))
                                 logger.info(f"Review saved for car {car_name_out} by user {reviewer_id}")
 
                                 review_progress[review_id] = {'reviewed': True}
