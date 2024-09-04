@@ -9,8 +9,6 @@ from logging import handlers
 from lxml import html
 from playwright.sync_api import sync_playwright
 
-'''在使用懂车帝程序的时候，一定要记得把所有的代理关闭'''
-
 def create_directory(path):
     directory = Path(path)
     if not directory.exists():
